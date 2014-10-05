@@ -4,11 +4,24 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
     <title>Register</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/reg.js"></script>
 </head>
 
 <body>
+	<?php
+	// form data vars
+	$first = $last = $gender = $month = $year = $phone = $line1 = $line2 = $city = "";
+	$country = $state = $zip = $email1 = $email2 = $username = $password1 = $password2 = "";
+	
+	
+	// parse form input
+	function parse_form_input( $data) {
+		$data = htmlspecialchars( stripcslashes( trim( $data)));
+	}
+	?>
     <!-- Form Entry -->
-    <form action="post">
+    <form method="post" action="<?php echo htmlspecialchars( $_SERVER["PHP_SELF"]); ?>">
         <fieldset>
             <legend>Name</legend>
             First:
@@ -26,23 +39,19 @@
         <fieldset>
             <legend>Date of Birth</legend>
             Month:
-            <select name="month" size="1">
-                <option selected="selected" value="">Select a Month</option>
-                <option value="jan">January</option>
-                <option value="feb">February</option>
-                <option value="mar">March</option>
-                <option value="apr">April</option>
-                <option value="may">May</option>
-                <option value="jun">June</option>
-                <option value="jul">July</option>
-                <option value="aug">August</option>
-                <option value="sep">September</option>
-                <option value="oct">October</option>
-                <option value="nov">November</option>
-                <option value="dec">December</option>
+            <select name="month" id="monthSelector">
+			<option value = "">Select a Month</option>
             </select>
             Year:
             <input type="text" name="year">
+        </fieldset>
+        <fieldset>
+            <legend>Phone Number</legend>
+            Primary Phone:
+            <input type="text" name="phone1">
+            <br> Secondary Phone:
+            <input type="text" name="phone2">
+            <br>
         </fieldset>
         <fieldset>
             <legend>Address</legend>
@@ -52,60 +61,13 @@
             <input type="text" name="line2">
             <br>City:
             <input type="text" name="city">
+            <br>Country:
+            <select name="country" id="countrySelector">
+			<option value = "">Select a Country</option>
+            </select>
             <br>State:
-            <select name="state">
-                <option value="" selected="selected">Select a State</option>
-                <option value="AL">Alabama</option>
-                <option value="AK">Alaska</option>
-                <option value="AZ">Arizona</option>
-                <option value="AR">Arkansas</option>
-                <option value="CA">California</option>
-                <option value="CO">Colorado</option>
-                <option value="CT">Connecticut</option>
-                <option value="DE">Delaware</option>
-                <option value="DC">District Of Columbia</option>
-                <option value="FL">Florida</option>
-                <option value="GA">Georgia</option>
-                <option value="HI">Hawaii</option>
-                <option value="ID">Idaho</option>
-                <option value="IL">Illinois</option>
-                <option value="IN">Indiana</option>
-                <option value="IA">Iowa</option>
-                <option value="KS">Kansas</option>
-                <option value="KY">Kentucky</option>
-                <option value="LA">Louisiana</option>
-                <option value="ME">Maine</option>
-                <option value="MD">Maryland</option>
-                <option value="MA">Massachusetts</option>
-                <option value="MI">Michigan</option>
-                <option value="MN">Minnesota</option>
-                <option value="MS">Mississippi</option>
-                <option value="MO">Missouri</option>
-                <option value="MT">Montana</option>
-                <option value="NE">Nebraska</option>
-                <option value="NV">Nevada</option>
-                <option value="NH">New Hampshire</option>
-                <option value="NJ">New Jersey</option>
-                <option value="NM">New Mexico</option>
-                <option value="NY">New York</option>
-                <option value="NC">North Carolina</option>
-                <option value="ND">North Dakota</option>
-                <option value="OH">Ohio</option>
-                <option value="OK">Oklahoma</option>
-                <option value="OR">Oregon</option>
-                <option value="PA">Pennsylvania</option>
-                <option value="RI">Rhode Island</option>
-                <option value="SC">South Carolina</option>
-                <option value="SD">South Dakota</option>
-                <option value="TN">Tennessee</option>
-                <option value="TX">Texas</option>
-                <option value="UT">Utah</option>
-                <option value="VT">Vermont</option>
-                <option value="VA">Virginia</option>
-                <option value="WA">Washington</option>
-                <option value="WV">West Virginia</option>
-                <option value="WI">Wisconsin</option>
-                <option value="WY">Wyoming</option>
+            <select name="state" id="stateSelector">
+			<option value = "">Select a State</option>
             </select>
             Zipcode:
             <input type="text" name="zip">
@@ -129,6 +91,8 @@
             <input type="text" name="password2">
             <br>
         </fieldset>
+        <br>
+        <input type="submit" value="Submit">
     </form>
 </body>
 
