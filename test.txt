@@ -1,0 +1,83 @@
+<?PHP
+// form data vars
+$first=$last=$gender=$month=$year=$phone1=$phone2=$line1=$line2=$city="";
+$country=$state=$zip=$email1=$email2=$username=$password1=$password2="";
+
+// "is empty" array
+$isEmpty=array("first" => false, "last" => false, "gender" => false, "gender" => false, "month" => false, "year" => false, "phone1" => false,
+    "phone2" => false, "line1" => false, "line2" => false, "city" => false, "state" => false, "country" => false, "zip" => false, "email1" => false,
+    "email2" => false, "username" => false, "password1" => false, "password2" => false);
+
+// bools
+$isUS=$missingRequired=false;
+
+// fix input
+function fix_input($data) {
+    return htmlspecialchars(stripcslashes(trim($data)));
+}
+
+// parse form input
+function parse_form_input($id) {
+    global $missingRequired, $country, $isEmpty;
+    $isEmpty[$id]=empty($_POST[$id]);
+    $data="";
+    if (!$isEmpty[$id]) {
+        $data=fix_input($_POST[$id]);
+    } else {
+        switch ($id) {
+            case "state":
+                if ($country == "US") {
+                    $missingRequired=true;
+                }
+                break;
+            case "phone2":
+                break;
+            case "line2":
+                break;
+            default:
+                $missingRequired=true;
+                break;
+        }
+    }
+    return $data;
+}
+
+// echo previous form data
+function echo_preivious($id) {
+    if (isset($_POST[$id])) {
+        echo fix_input($_POST[$id]);
+    }
+}
+
+// Has a form been submitted ?
+$formSubmitted=( $_SERVER["REQUEST_METHOD"] == "POST");
+
+// Parse Form Data if it has been submitted
+if ($formSubmitted) {
+    $first=parse_form_input("first");
+    $last=parse_form_input("last");
+
+    $gender=parse_form_input("gender");
+
+    $month=parse_form_input("month");
+    $year=parse_form_input("year");
+
+    $phone1=parse_form_input("phone1");
+    $phone2=parse_form_input("phone2");
+
+    $line1=parse_form_input("line1");
+    $line2=parse_form_input("line2");
+    $city=parse_form_input("city");
+    $country=parse_form_input("country");
+    $isUS=( $country == "US");
+    $state=parse_form_input("state");
+    $zipcode=parse_form_input("zip");
+
+    $email1=parse_form_input("email1");
+    $email2=parse_form_input("email2");
+
+    $username=parse_form_input("username");
+    $password1=parse_form_input("password1");
+    $password2=parse_form_input("password2");
+}
+?>
