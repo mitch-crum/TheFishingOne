@@ -40,6 +40,34 @@ class root {
         return ( $str);
     }
 
+    public static function hasCorrectChars( $str, $delim) {
+        switch ( $delim) {
+            case "phone" :
+                return ( filter_var( $str, FILTER_VALIDATE_REGEXP,
+                    array("options" => array("regexp" => "/^(\+\d{1,2}\s*)?\(?\d{3}\)?\s*-?\d{3}\s*-?\d{4}$/")))!=false);
+            case "email":
+                return ( filter_var( $str, FILTER_VALIDATE_EMAIL)!=false);
+            case "name": 
+                return ( filter_var( $str, FILTER_VALIDATE_REGEXP,
+                    array("options" => array("regexp" => "/^[A-Za-z\s]+$/")))!=false);
+            case "address": 
+                return ( filter_var( $str, FILTER_VALIDATE_REGEXP,
+                    array("options" => array("regexp" => "/^[A-Za-z\d\s]+$/")))!=false);
+            case "zipcode": 
+                return ( filter_var( $str, FILTER_VALIDATE_REGEXP,
+                    array("options" => array("regexp" => "/^[\d]+$/")))!=false);
+            case "username": 
+                return ( filter_var( $str, FILTER_VALIDATE_REGEXP,
+                    array("options" => array("regexp" => "/^[\w]+$/")))!=false);
+            case "password": 
+                return ( filter_var( $str, FILTER_VALIDATE_REGEXP,
+                    array("options" => array("regexp" => "/^[\w!@#$%^&*]{6,16}$/")))!=false);
+            default:
+                return ( filter_var( $str, FILTER_VALIDATE_REGEXP,
+                    array("options" => array("regexp" => $delim)))!=false);
+        }
+    }
+
 }
 
 ?>

@@ -2,13 +2,22 @@
 require_once( __DIR__ . "/include/rootFunc.php");
 require_once( __DIR__ . "/include/user_manage/user_manage_config.php");
 
+// If Form Submitted
+if (filter_has_var(INPUT_POST, "submitted")) {
+    $userMan->getRegFormData();
+    $userMan->regFormsValidate();
+}
+
 // Echo Error Class Selectors
 function echoErrorClass($ids) {
     global $userMan;
     $doIt = true;
-    foreach ($ids as $val) {
-        if (!$userMan->isRegFormValid($val)) {
-            $doIt = false;
+    reset($ids);
+    if (filter_has_var(INPUT_POST, "submitted")) {
+        foreach ($ids as $val) {
+            if (!$userMan->regFormIsValid($val)) {
+                $doIt = false;
+            }
         }
     }
     echo $doIt ? "normal" : "error";
@@ -24,14 +33,19 @@ function echoErrorClass($ids) {
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script type="text/javascript">
             var Selections = {
-                month: "<?php root::echoPost("month"); ?>",
-                state: "<?php root::echoPost("state"); ?>",
-                country: "<?php root::echoPost("country"); ?>"
+                month: "<?php $userMan->regFormSafeDisplace("month"); ?>",
+                state: "<?php $userMan->regFormSafeDisplace("state"); ?>",
+                country: "<?php $userMan->regFormSafeDisplace("country"); ?>"
             };
         </script>
         <script type="text/javascript" src="reg.js"></script>
     </head>
     <body>
+        <div class="error">
+<?PHP
+$userMan->echoRegFormErrors();
+?>
+        </div>
         <div class="formDiv">
             <!-- Form Entry -->
             <form method="post" id="registration_form" action="<?php echo root::getSelf(); ?>">
@@ -44,11 +58,11 @@ function echoErrorClass($ids) {
                     <legend class="<?php echoErrorClass(array("first", "last")); ?>">Name*</legend>
                     <div>
                         <label for="first" class="<?php echoErrorClass(array("first")); ?>">First*: </label><br>
-                        <input type="text" name="first" id="first" value="<?php root::echoPost("first"); ?>">
+                        <input type="text" name="first" id="first" value="<?php $userMan->regFormSafeDisplace("first"); ?>">
                     </div>
                     <div>
                         <label for="last" class="<?php echoErrorClass(array("last")); ?>">Last*: </label><br>
-                        <input type="text" id="last" name="last" value="<?php root::echoPost("last"); ?>">
+                        <input type="text" id="last" name="last" value="<?php $userMan->regFormSafeDisplace("last"); ?>">
                     </div>
                 </fieldset>
                 <!-- Gender -->
@@ -86,7 +100,7 @@ function echoErrorClass($ids) {
                     </div>
                     <div>
                         <label for="year" class="<?php echoErrorClass(array("year")); ?>">Year*:</label><br>
-                        <input type="text" name="year" id="year" value="<?php root::echoPost("year"); ?>">
+                        <input type="text" name="year" id="year" value="<?php $userMan->regFormSafeDisplace("year"); ?>">
                     </div>
                 </fieldset>
                 <!-- Phone -->
@@ -94,27 +108,27 @@ function echoErrorClass($ids) {
                     <legend class="<?php echoErrorClass(array("phone1")); ?>">Phone Number*</legend>
                     <div>
                         <label for="phone1" class="<?php echoErrorClass(array("phone1")); ?>">Primary Phone*:</label><br>
-                        <input type="text" id="phone1" name="phone1" value="<?php root::echoPost("phone1"); ?>">
+                        <input type="text" id="phone1" name="phone1" value="<?php $userMan->regFormSafeDisplace("phone1"); ?>">
                     </div>
                     <div>
-                        <label for="phone2" class="normal">Secondary Phone:</label><br>
-                        <input type="text" id="phone2" name="phone2" value="<?php root::echoPost("phone2"); ?>">
+                        <label for="phone2" class="<?php echoErrorClass(array("phone2")); ?>">Secondary Phone*:</label><br>
+                        <input type="text" id="phone2" name="phone2" value="<?php $userMan->regFormSafeDisplace("phone2"); ?>">
                     </div>
                 </fieldset>
                 <!-- Address -->
                 <fieldset>
-                    <legend class="<?php echoErrorClass(array("line1", "city", "country", "state", "zip")); ?>">Address*</legend>
+                    <legend class="<?php echoErrorClass(array("line1", "line2", "city", "country", "state", "zip")); ?>">Address*</legend>
                     <div>
                         <label for="line1" class="<?php echoErrorClass(array("line1")) ?>">Street Address*:</label><br>
-                        <input type="text" id="line1" name="line1" value="<?php root::echoPost("line1"); ?>">
+                        <input type="text" id="line1" name="line1" value="<?php $userMan->regFormSafeDisplace("line1"); ?>">
                     </div>
                     <div>
-                        <label for="line2" class="normal">Line 2:</label><br>
-                        <input type="text" id="line2" name="line2" value="<?php root::echoPost("line2"); ?>">
+                        <label for="line2" class="<?php echoErrorClass(array("line2")) ?>">Line 2:</label><br>
+                        <input type="text" id="line2" name="line2" value="<?php $userMan->regFormSafeDisplace("line2"); ?>">
                     </div>
                     <div>
                         <label for="city" class="<?php echoErrorClass(array("city")) ?>">City*:</label><br>
-                        <input type="text" id="city" name="city" value="<?php root::echoPost("city"); ?>">
+                        <input type="text" id="city" name="city" value="<?php $userMan->regFormSafeDisplace("city"); ?>">
                     </div>
                     <div>
                         <label for="countrySelector" class="<?php echoErrorClass(array("country")) ?>">Country*:</label><br>
@@ -130,7 +144,7 @@ function echoErrorClass($ids) {
                     </div>
                     <div>
                         <label for="zip" class="<?php echoErrorClass(array("zip")) ?>">Zipcode*:</label><br>
-                        <input type="text" id="zip" name="zip" value="<?php root::echoPost("zip"); ?>">
+                        <input type="text" id="zip" name="zip" value="<?php $userMan->regFormSafeDisplace("zip"); ?>">
                     </div>
                 </fieldset>
                 <!-- Email -->
@@ -138,11 +152,11 @@ function echoErrorClass($ids) {
                     <legend class="<?php echoErrorClass(array("email1", "email2")); ?>">Email*</legend>
                     <div>
                         <label for="email1" class="<?php echoErrorClass(array("email1")) ?>">Email*:</label><br>
-                        <input type="text" id="email1" name="email1" value="<?php root::echoPost("email1"); ?>">
+                        <input type="text" id="email1" name="email1" value="<?php $userMan->regFormSafeDisplace("email1"); ?>">
                     </div>
                     <div>
                         <label for="email2" class="<?php echoErrorClass(array("email2")) ?>">Verify Email*:</label><br>
-                        <input type="text" id="email2" name="email2" value="<?php root::echoPost("email2"); ?>">
+                        <input type="text" id="email2" name="email2" value="<?php $userMan->regFormSafeDisplace("email2"); ?>">
                     </div>
                     <br>
                 </fieldset>
@@ -151,7 +165,7 @@ function echoErrorClass($ids) {
                     <legend class="<?php echoErrorClass(array("username", "password1", "password2")); ?>">User*</legend>
                     <div>
                         <label for="username" class="<?php echoErrorClass(array("username")) ?>">Username*:</label><br>
-                        <input type="text" id="username" name="username" value="<?php root::echoPost("username"); ?>">                            
+                        <input type="text" id="username" name="username" value="<?php $userMan->regFormSafeDisplace("username"); ?>">                            
                     </div>
                     <div>
                         <label for="password1" class="<?php echoErrorClass(array("password1")) ?>">Password*:</label><br>
