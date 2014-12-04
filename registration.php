@@ -6,6 +6,9 @@ require_once( __DIR__ . "/include/user_manage/user_manage_config.php");
 if (filter_has_var(INPUT_POST, "submitted")) {
     $userMan->getRegFormData();
     $userMan->regFormsValidate();
+    if ($userMan->regFormIsValid()) {
+        $userMan->DB_addUser( );
+    }
 }
 
 // Echo Error Class Selectors
@@ -169,11 +172,11 @@ $userMan->echoRegFormErrors();
                     </div>
                     <div>
                         <label for="password1" class="<?php echoErrorClass(array("password1")) ?>">Password*:</label><br>
-                        <input type="text" id="password1" name="password1">
+                        <input type="password" id="password1" name="password1">
                     </div>
                     <div>
                         <label for="password2" class="<?php echoErrorClass(array("password2")) ?>">Verify Password*:</label><br>
-                        <input type="text" id="password2" name="password2">
+                        <input type="password" id="password2" name="password2">
                     </div>
                 </fieldset>
                 <div class="submitBttnClass">

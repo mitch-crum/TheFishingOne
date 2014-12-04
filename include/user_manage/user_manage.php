@@ -4,8 +4,15 @@ require_once( __DIR__ . "/../rootFunc.php");
 
 class UserMan {
 
-    private $user = "";
-    private $pswd = "";
+    const rndSeed = "910212d01c6ca98d108561a645b21e84";
+    
+    //Server Side User/Pass & Info
+    private $DB_host;
+    private $DB_username = "";
+    private $DB_password = "";
+    private $DB_db = "";
+    private $DB_table = "";
+    private $DB_connection;
     // reg form vars
     private $regFormValues = array("first" => "", "last" => "", "gender" => "", "month" => "",
         "year" => "", "phone1" => "", "phone2" => "",
@@ -23,7 +30,12 @@ class UserMan {
         "zip" => "Zipcode", "email1" => "Email", "email2" => "Verify Email",
         "username" => "Username", "password1" => "Password", "password2" => "Verify Password");
     private $regFormErrors = array();
+    // login form values
+    private $loginFormValues = array("username" => "", "password" => "");
+    private $loginFormValids = array("username" => false, "password" => false);
 
+    //private table
+    
     function getRegFormData() {
         reset($this->regFormValues);
         foreach ($this->regFormValues as $key => $entity) {
@@ -34,13 +46,50 @@ class UserMan {
             }
         }
     }
-
+    
+    function login() {
+        if (!$this->DB_Login()) {
+            error_log( "Failed to login to DB");
+            return false;
+        }
+        //Check User
+        $username = mysql_real_escape_string($this->loginFormValues["username"]);
+        $password = md5($this->loginFormValues["password"]);
+        $qry = "Select FIRSTNAME, EMAIL from `$this->DB_table` where username='$username' and password='$password'";
+        $result = mysql_query($qry,$this->DB_connection);
+        if(!$result || mysql_num_rows($result) <= 0)
+        {
+            error_log("Error logging in. The username or password does not match");
+            return false;
+        }
+        return true;
+    }
+    
+    function getLoginFormData() {
+        reset($this->loginFormValues);
+        foreach ($this->loginFormValues as $key => $entity) {
+            if (filter_has_var(INPUT_POST, $key)) {
+                // IMPORTANT!!! In order to securely/correctly display the form values, htmlentities() MUST be used first as quotes
+                // are not filtered
+                $this->loginFormValues[$key] = trim(filter_input(INPUT_POST, $key, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES));
+            }
+        }
+    }
+    
     function regFormHTML($key) {
         return htmlentities(root::sanitize($this->regFormValues[$key]));
     }
 
     function regFormSafeDisplace($key) {
         echo $this->regFormHTML($key);
+    }
+    
+    function loginFormHTML($key) {
+        return htmlentities(root::sanitize($this->loginFormValues[$key]));
+    }
+
+    function loginFormSafeDisplace($key) {
+        echo $this->loginFormHTML($key);
     }
 
     function regFormsValidate() {
@@ -134,10 +183,143 @@ class UserMan {
         }
     }
     
-    function regFormIsValid($key) {
-        return ( $this->regFormValids[$key]);
+    function regFormIsValid($key=null) {
+        if ( $key!=null) {
+            return ( $this->regFormValids[$key]);
+        }
+        else {
+            foreach ($this->regFormValids as $keyIndex => $entity) {
+                if (!$entity) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
-
+    
+    function DB_Init( $host, $username, $password, $database, $table) {
+        $this->DB_host = $host;
+        $this->DB_username = $username;
+        $this->DB_password = $password;
+        $this->DB_db = $database;
+        $this->DB_table = $table;
+    }
+    
+    function DB_Login( ) {
+        $this->DB_connection = mysql_connect( $this->DB_host, $this->DB_username, $this->DB_password);
+        if (!$this->DB_connection) {
+            error_log("Couldn't Connect to DB");
+            return false;
+        }
+        if (!mysql_select_db($this->DB_db)) {
+            error_log("Couldn't select DB");
+            return false;
+        }
+        if (!mysql_query("SET NAMES 'UTF8'", $this->DB_connection)) {
+            error_log("Couldn't set character encoding");
+            return false;
+        }
+        return true;
+    }
+    
+    function DB_addUser( ) {
+        if (!$this->DB_Login( )) {
+            error_log( "Failed to login to DB");
+            return false;
+        }
+        // does table exists?
+        $result = mysql_query("SHOW COLUMNS FROM `$this->DB_table`");   
+        if(!$result || mysql_num_rows($result) <= 0)
+        {
+            return $this->CreateTable();
+        }
+        // check unique user
+        if( !$this->DB_isFieldUnique( $this->regFormValues,"email1"))
+        {
+            error_log("This email is already registered");
+            return false;
+        }
+        
+        if( !$this->DB_isFieldUnique( $this->regFormValues,"username"))
+        {
+            error_log("This UserName is already used. Please try another username");
+            return false;
+        }        
+        if( !$this->DB_insertUser( $this->regFormValues))
+        {
+            error_log("Inserting to Database failed!");
+            return false;
+        }
+        return true;
+    }
+    
+    function DB_isFieldUnique($formvars,$fieldname)
+    {
+        $field_val = mysql_real_escape_string($formvars[$fieldname]);
+        $qry = "SELECT username FROM `$this->DB_table` WHERE $fieldname='".$field_val."'";
+        $result = mysql_query($qry,$this->DB_connection);   
+        if($result && mysql_num_rows($result) > 0)
+        {
+            return false;
+        }
+        return true;
+    }
+    
+    function DB_insertUser( $formvars) {
+        $confirmCode = $this->generateConfirmCode($formvars["email1"]);
+        $query = "INSERT INTO `$this->DB_table`"
+                . "("
+                . "username,"
+                . "password,"
+                . "firstname,"
+                . "lastname,"
+                . "email,"
+                . "phone1,"
+                . "phone2,"
+                . "address1,"
+                . "address2,"
+                . "city,"
+                . "state,"
+                . "country,"
+                . "zipcode,"
+                . "gender,"
+                . "year,"
+                . "month,"
+                . "confirmcode,"
+                . "confirmed"
+                . ")"
+                . "values( "
+                . "'" . $formvars["username"] . "',"
+                . "'".md5($formvars["password1"])."',"
+                . "'" . $formvars["first"] . "',"
+                . "'" . $formvars["last"] . "',"
+                . "'" . $formvars["email1"] . "',"
+                . "'" . $formvars["phone1"] . "',"
+                . "'" . $formvars["phone2"] . "',"
+                . "'" . $formvars["line1"] . "',"
+                . "'" . $formvars["line2"] . "',"
+                . "'" . $formvars["city"] . "',"
+                . "'" . $formvars["state"] . "',"
+                . "'" . $formvars["country"] . "',"
+                . "'" . $formvars["zip"] . "',"
+                . "'" . $formvars["gender"] . "',"
+                . "'" . $formvars["year"] . "',"
+                . "'" . $formvars["month"] . "',"
+                . "'" . $confirmCode . "',"
+                . "'" . false . "'"
+                . ")"
+                ;
+        if(!mysql_query( $query ,$this->DB_connection))
+        {
+            error_log("Error inserting data to the table\nquery:$query");
+            return false;
+        }        
+        return true;
+    }
+    
+    function generateConfirmCode( $email) {
+        return md5( $email . rand() . self::rndSeed . rand());
+    }
 }
 
 ?>
