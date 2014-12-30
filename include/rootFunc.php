@@ -37,7 +37,7 @@ class root {
             );
             $str = preg_replace($injections, '', $str);
         }
-        return ( $str);
+        return mysql_real_escape_string( $str);
     }
 
     public static function hasCorrectChars( $str, $delim) {
