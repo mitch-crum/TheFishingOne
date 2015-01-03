@@ -16,7 +16,13 @@ if (filter_has_var(INPUT_POST, "submitted")) {
         <title>Login</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" type="text/css" href="reg.css">
-
+        <style type="text/css">
+            body {
+                background: url("res/img/regBackS2.png");
+                background-size: cover;
+                background-attachment: fixed;
+            }
+        </style>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
         <script type="text/javascript" src="reg.js"></script>
@@ -35,7 +41,7 @@ if (filter_has_var(INPUT_POST, "submitted")) {
                             <!-- Form Entry -->
                             <form method="post" id="registration_form" action="<?php echo root::getSelf(); ?>">
                                 <div>
-                                <input type="hidden" name="submitted" id="submitted" value="1">
+                                    <input type="hidden" name="submitted" id="submitted" value="1">
                                 </div>
                                 <fieldset>
                                     <legend>Login</legend>

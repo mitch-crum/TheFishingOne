@@ -9,7 +9,6 @@ body {
     padding: 0;
     border:0;	
     min-width: 550px;
-    background: url("res/img/regBackS.png");
     background-size: cover;
     background-attachment: fixed;
     color: black;
